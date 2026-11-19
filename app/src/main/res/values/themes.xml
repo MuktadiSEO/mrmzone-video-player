@@ -1,0 +1,46 @@
+<resources>
+    <style name="Theme.MRM" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/brand_blue</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorPrimaryContainer">#D6E4FF</item>
+        <item name="colorSecondary">@color/brand_orange</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+        <item name="colorSecondaryContainer">#FFE1DA</item>
+        <item name="colorTertiary">@color/brand_gold</item>
+        <item name="android:colorBackground">@color/bg</item>
+        <item name="android:statusBarColor">@color/bar</item>
+        <item name="android:navigationBarColor">@color/bar</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+    <style name="Theme.MRM.Player" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/brand_orange</item>
+        <item name="colorSecondary">@color/brand_orange</item>
+        <item name="colorAccent">@color/brand_orange</item>
+        <item name="android:colorBackground">#000000</item>
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="28" xmlns:tools="http://schemas.android.com/tools">shortEdges</item>
+    </style>
+
+    <style name="PlayerIcon">
+        <item name="android:layout_width">44dp</item>
+        <item name="android:layout_height">44dp</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="android:tint">#FFFFFF</item>
+    </style>
+
+    <style name="PlayerTool">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:paddingBottom">4dp</item>
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+    </style>
+</resources>

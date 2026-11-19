@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/m_search" android:title="Search" android:icon="@drawable/ic_search"
+        app:showAsAction="collapseActionView|always" app:actionViewClass="androidx.appcompat.widget.SearchView" />
+    <item android:id="@+id/m_view" android:title="Grid / List" android:icon="@drawable/ic_grid" app:showAsAction="always" />
+    <item android:id="@+id/m_sort" android:title="Sort by…" />
+    <item android:id="@+id/m_refresh" android:title="Refresh" />
+    <item android:id="@+id/m_open_url" android:title="Network stream" />
+    <item android:id="@+id/m_clear_history" android:title="Clear history" />
+    <item android:id="@+id/m_settings" android:title="Settings" />
+    <item android:id="@+id/m_about" android:title="About" />
+</menu>

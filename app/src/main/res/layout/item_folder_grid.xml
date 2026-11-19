@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:layout_margin="5dp"
+    app:cardBackgroundColor="@color/surface" app:cardCornerRadius="12dp" app:cardElevation="1dp"
+    app:strokeWidth="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:gravity="center_horizontal" android:padding="12dp">
+        <FrameLayout android:layout_width="64dp" android:layout_height="64dp"
+            android:background="@drawable/bg_icon_round">
+            <ImageView
+                android:layout_width="38dp" android:layout_height="38dp" android:layout_gravity="center"
+                android:src="@drawable/ic_folder_w" />
+            <TextView android:id="@+id/count"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end" android:layout_margin="3dp"
+                android:background="@drawable/bg_new" android:paddingHorizontal="5dp"
+                android:textColor="#FFFFFF" android:textSize="10.5sp" android:textStyle="bold" android:maxLines="1" />
+        </FrameLayout>
+        <TextView android:id="@+id/name"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" android:gravity="center"
+            android:textSize="14sp" android:textStyle="bold" android:textColor="@color/text_primary"
+            android:maxLines="2" android:minLines="2" android:ellipsize="end" />
+        <TextView android:id="@+id/info"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="2dp" android:gravity="center"
+            android:textSize="11.5sp" android:textColor="@color/text_secondary"
+            android:maxLines="1" android:ellipsize="end" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
