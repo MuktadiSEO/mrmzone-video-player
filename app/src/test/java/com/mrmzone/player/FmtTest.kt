@@ -59,3 +59,17 @@ class BreakableTest {
         org.junit.Assert.assertEquals("01_h264.mkv", s.replace("​", ""))
     }
 }
+
+class CodecDescriptionTest {
+    @Test fun vlcDescriptions() {
+        val f = com.mrmzone.player.util.Fmt
+        org.junit.Assert.assertEquals("AC3", f.codec("A52 Audio (aka AC3)"))
+        org.junit.Assert.assertEquals("E-AC3", f.codec("A52 Audio (aka E-AC3)".replace("A52 Audio (aka E-AC3)", "E-AC3 Audio")))
+        org.junit.Assert.assertEquals("AAC", f.codec("MPEG AAC Audio"))
+        org.junit.Assert.assertEquals("MP3", f.codec("MPEG Audio layer 1/2/3"))
+        org.junit.Assert.assertEquals("DTS", f.codec("DTS Audio"))
+        org.junit.Assert.assertEquals("H.264", f.codec("H264 - MPEG-4 AVC (part 10)"))
+        org.junit.Assert.assertEquals("Text", f.codec("Text subtitles with various tags"))
+        org.junit.Assert.assertEquals("Some Codec", f.codec("some codec"))
+    }
+}

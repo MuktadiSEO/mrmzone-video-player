@@ -37,14 +37,21 @@ The engine is the open-source **VLC (libVLC 3.6)**. AC3/DTS/TrueHD audio is alwa
 ## Build
 
 ```bash
-./gradlew testDebugUnitTest assembleDebug
+./gradlew testDebugUnitTest assembleRelease
 ```
 
-The APKs land in `app/build/outputs/apk/debug/`:
-- `app-universal-debug.apk`: runs on every phone (recommended)
-- `app-arm64-v8a-debug.apk`: smaller, for modern phones
+The APKs land in `app/build/outputs/apk/release/`:
+- `app-arm64-v8a-release.apk` (~28 MB): almost every phone from 2017 on (recommended)
+- `app-armeabi-v7a-release.apk` (~25 MB): older 32-bit phones
+- `app-universal-release.apk` (~92 MB): runs on every phone, if you're not sure which to pick
 
 GitHub Actions builds the APKs on every push (Actions → Build APK → Artifacts).
 
 ## License note
 libVLC is LGPL-2.1. The app links to it dynamically, as an unmodified `.so` from Maven Central.
+
+## Testing
+
+- 18 unit tests: `./gradlew testDebugUnitTest`
+- Tested on an Android 11 emulator with 16 formats, each played to the end: MKV H.264 + AC3 5.1/E-AC3 + SRT, MP4 HEVC + E-AC3, AVI Xvid + MP3 (+ external SRT), WMV + WMA, FLV + MP3, WEBM VP9 + Opus, TS MPEG-2 + AC3, MKV + DTS, MKV AV1 + FLAC, 3GP H.263 + AAC, MOV + PCM, RM RV20 + AC3, MKV + TrueHD, MPG MPEG-2 + MP2, portrait MP4, and a Bangla file name
+- Bangla subtitle rendering, audio track dialog (AC3 5.1), decoder switch, volume gesture, settings, dark mode, a small screen (320dp) with large text (130%)

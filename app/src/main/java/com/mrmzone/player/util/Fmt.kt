@@ -88,8 +88,41 @@ object Fmt {
             "tx3g" -> "TX3G"
             "spu", "spu ", "vobsub" -> "VobSub"
             "pgs" -> "PGS"
-            else -> c.uppercase()
+            else -> fromDescription(c)
         }
+    }
+
+    /** VLC often gives a description ("A52 Audio (aka AC3)", "MPEG AAC Audio") instead of a fourcc. */
+    private fun fromDescription(d: String): String {
+        val rules = listOf(
+            listOf("e-ac3", "eac3", "e-ac-3") to "E-AC3",
+            listOf("a52", "ac3", "ac-3") to "AC3",
+            listOf("truehd", "mlp") to "TrueHD",
+            listOf("dts") to "DTS",
+            listOf("aac") to "AAC",
+            listOf("layer 1/2/3", "layer 3", "mp3") to "MP3",
+            listOf("layer 1/2", "layer 2", "mp2") to "MP2",
+            listOf("opus") to "Opus",
+            listOf("vorbis") to "Vorbis",
+            listOf("flac") to "FLAC",
+            listOf("windows media audio", "wma") to "WMA",
+            listOf("pcm") to "PCM",
+            listOf("hevc", "h265", "h.265") to "H.265",
+            listOf("h264", "h.264", "avc") to "H.264",
+            listOf("av1") to "AV1",
+            listOf("vp9") to "VP9",
+            listOf("vp8") to "VP8",
+            listOf("mpeg-4", "mpeg4", "xvid", "divx") to "MPEG-4",
+            listOf("mpeg-1/2", "mpeg-2", "mpeg2") to "MPEG-2",
+            listOf("subrip", "srt") to "SRT",
+            listOf("ssa", "ass") to "ASS",
+            listOf("pgs") to "PGS",
+            listOf("dvd sub", "vobsub") to "VobSub",
+            listOf("text subtitle") to "Text",
+        )
+        for ((keys, name) in rules) if (keys.any { d.contains(it) }) return name
+        if (d.length <= 4 && !d.contains(' ')) return d.uppercase() // unknown fourcc
+        return d.split(' ').filter { it.isNotEmpty() }.joinToString(" ") { it.replaceFirstChar { ch -> ch.uppercase() } }
     }
 
     fun channels(n: Int): String = when (n) {

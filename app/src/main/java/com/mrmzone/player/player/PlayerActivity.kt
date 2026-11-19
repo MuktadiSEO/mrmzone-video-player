@@ -367,6 +367,8 @@ class PlayerActivity : AppCompatActivity() {
             }
         }
         if (name.isNullOrBlank()) name = Uri.decode(uri.lastPathSegment ?: uri.toString()).substringAfterLast('/').ifBlank { uri.toString() }
+        // "/sdcard/x.mkv" and "/storage/emulated/0/x.mkv" are the same file: one key for resume & history
+        if (path.isNotEmpty()) path = runCatching { File(path).canonicalPath }.getOrDefault(path)
         return Item(uri.toString(), path, name!!)
     }
 
@@ -387,6 +389,7 @@ class PlayerActivity : AppCompatActivity() {
             Decoder.HW_PLUS -> media.setHWDecoderEnabled(true, true)
             Decoder.SW -> media.setHWDecoderEnabled(false, false)
         }
+        media.addOption(":sub-track=0") // like MX: subtitles on by default (first track) from the very first line
         if (startMs > 0) media.addOption(String.format(Locale.US, ":start-time=%.3f", startMs / 1000.0))
         return media
     }
@@ -506,12 +509,11 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun showError(msg: String) {
         if (isFinishing) return
-        MaterialAlertDialogBuilder(this).setTitle("Can't play").setMessage(msg)
-            .setPositiveButton(if (index + 1 < items.size) "Next video" else "Close") { _, _ ->
-                if (index + 1 < items.size) playItem(index + 1, true) else finish()
-            }
+        val b = MaterialAlertDialogBuilder(this).setTitle("Can't play").setMessage(msg)
             .setNegativeButton("Close") { _, _ -> finish() }
-            .setCancelable(false).show()
+            .setCancelable(false)
+        if (index + 1 < items.size) b.setPositiveButton("Next video") { _, _ -> playItem(index + 1, true) }
+        b.show()
     }
 
     private fun savePosition() {

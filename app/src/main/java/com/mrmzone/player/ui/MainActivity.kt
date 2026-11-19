@@ -232,8 +232,8 @@ class MainActivity : AppCompatActivity() {
     private fun updateStatus() {
         val src = folderPath?.let { p -> videos.filter { it.folderPath == p } } ?: videos
         val folders = src.map { it.folderPath }.distinct().size
-        statusBar.text = if (folderPath != null) "Videos: ${src.size}   •   Size: ${Fmt.size(src.sumOf { it.size })}   •   Sort: ${prefs.sortBy.label}"
-        else "Videos: ${src.size}   •   Folders: $folders   •   Size: ${Fmt.size(src.sumOf { it.size })}"
+        statusBar.text = if (folderPath != null) "Videos: ${src.size}   •   ${Fmt.size(src.sumOf { it.size })}"
+        else "Videos: ${src.size}   •   Folders: $folders   •   ${Fmt.size(src.sumOf { it.size })}"
     }
 
     // ---------------- command bar (IDM style) ----------------

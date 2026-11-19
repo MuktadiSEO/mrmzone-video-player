@@ -25,16 +25,23 @@ object Dialogs {
     private fun dp(c: Context, v: Int) = (v * c.resources.displayMetrics.density).toInt()
 
     fun openUrl(a: Activity) {
-        val til = TextInputLayout(a).apply { hint = "http(s)://, rtsp://, rtmp://, m3u8 …" }
+        val til = TextInputLayout(a, null, com.google.android.material.R.attr.textInputOutlinedStyle).apply {
+            hint = "Video URL"
+            helperText = "http(s), m3u8, rtsp, rtmp, mms, udp"
+        }
         val et = TextInputEditText(til.context).apply {
             inputType = InputType.TYPE_TEXT_VARIATION_URI or InputType.TYPE_CLASS_TEXT
             maxLines = 3
         }
-        til.addView(et)
+        til.addView(et, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
         val clip = (a.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).primaryClip
         val text = clip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.text?.toString()?.trim()
         if (text != null && Regex("^(https?|rtsp|rtmp|mms|udp|ftp)://\\S+$", RegexOption.IGNORE_CASE).matches(text)) et.setText(text)
-        val box = LinearLayout(a).apply { setPadding(dp(a, 20), dp(a, 8), dp(a, 20), 0); addView(til) }
+        val box = LinearLayout(a).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(a, 22), dp(a, 12), dp(a, 22), 0)
+            addView(til, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
+        }
         MaterialAlertDialogBuilder(a)
             .setTitle("Network stream")
             .setView(box)

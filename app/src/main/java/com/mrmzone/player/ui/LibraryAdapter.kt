@@ -89,7 +89,6 @@ class LibraryAdapter(
             val parts = mutableListOf<String>()
             Fmt.quality(vd.width, vd.height).takeIf { it.isNotEmpty() }?.let { parts += it }
             parts += Fmt.size(vd.size)
-            if (!grid && vd.ext.isNotEmpty()) parts += vd.ext
             info.text = parts.joinToString(" • ")
             duration.text = if (vd.duration > 0) Fmt.time(vd.duration) else vd.ext.ifEmpty { "VIDEO" }
 
