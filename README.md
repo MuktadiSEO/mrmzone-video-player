@@ -53,6 +53,6 @@ libVLC is LGPL-2.1. The app links to it dynamically, as an unmodified `.so` from
 
 ## Testing
 
-- 18 unit tests: `./gradlew testDebugUnitTest`
+- 22 unit tests: `./gradlew testDebugUnitTest`
 - Tested on an Android 11 emulator with 16 formats, each played to the end: MKV H.264 + AC3 5.1/E-AC3 + SRT, MP4 HEVC + E-AC3, AVI Xvid + MP3 (+ external SRT), WMV + WMA, FLV + MP3, WEBM VP9 + Opus, TS MPEG-2 + AC3, MKV + DTS, MKV AV1 + FLAC, 3GP H.263 + AAC, MOV + PCM, RM RV20 + AC3, MKV + TrueHD, MPG MPEG-2 + MP2, portrait MP4, and a Bangla file name
 - Bangla subtitle rendering, audio track dialog (AC3 5.1), decoder switch, volume gesture, settings, dark mode, a small screen (320dp) with large text (130%)
