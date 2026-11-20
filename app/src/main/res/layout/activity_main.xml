@@ -36,16 +36,12 @@
                         android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:text="MRM Zone Player" android:textColor="#FFFFFF"
                         android:textSize="19sp" android:textStyle="bold"
-                        android:maxLines="1" android:ellipsize="end"
-                        app:autoSizeTextType="uniform" app:autoSizeMinTextSize="14sp"
-                        app:autoSizeMaxTextSize="19sp" app:autoSizeStepGranularity="1sp" />
+                        android:maxLines="1" android:ellipsize="end" />
                     <TextView
                         android:id="@+id/subtitle"
                         android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:text="HD Video Player • All Formats" android:textColor="@color/bar_text_dim"
-                        android:textSize="11sp" android:maxLines="1" android:ellipsize="end"
-                        app:autoSizeTextType="uniform" app:autoSizeMinTextSize="9sp"
-                        app:autoSizeMaxTextSize="11sp" app:autoSizeStepGranularity="0.5sp" />
+                        android:textSize="11sp" android:maxLines="1" android:ellipsize="end" />
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.appbar.MaterialToolbar>

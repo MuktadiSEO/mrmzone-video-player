@@ -69,8 +69,12 @@ class LibraryAdapter(
         fun bind(f: Folder) {
             name.text = Fmt.breakable(f.name)
             count.text = f.count.toString()
-            info.text = if (grid) Fmt.size(f.totalSize)
-            else "${f.count} video${if (f.count == 1) "" else "s"} • ${Fmt.size(f.totalSize)}"
+            val vids = "${f.count} video${if (f.count == 1) "" else "s"}"
+            info.text = when {
+                f.subfolders > 0 -> "${f.subfolders} folder${if (f.subfolders == 1) "" else "s"} • $vids"
+                grid -> Fmt.size(f.totalSize)
+                else -> "$vids • ${Fmt.size(f.totalSize)}"
+            }
             itemView.setOnClickListener { onFolder(f) }
         }
     }

@@ -20,6 +20,7 @@ The engine is the open-source **VLC (libVLC 3.6)**. AC3/DTS/TrueHD audio is alwa
 - Three tabs: FOLDERS / VIDEOS / RECENT, plus an IDM-style command bar and a status bar
 - Thumbnails, length, quality (720p/1080p/4K), size, a "NEW" badge and a resume progress bar
 - Length and resolution are filled in by VLC for AVI/WMV/FLV/MPG files that Android can't read itself
+- Two folder views: **All folders** (every folder with videos in one list) or **Folder by folder** (open folders level by level, with a path bar such as "Videos › DCIM")
 - Grid and list views, sort by name (natural: Ep 2 comes before Ep 10), date, size or length, and search
 - Properties, Share, Delete (with Android's own confirmation)
 
@@ -28,7 +29,7 @@ The engine is the open-source **VLC (libVLC 3.6)**. AC3/DTS/TrueHD audio is alwa
 - HW / HW+ / SW decoder switch while a video plays. If HW fails, it falls back to SW automatically
 - Audio track selection (shows codec and channels, e.g. "AC3 5.1"), audio delay
 - Subtitle track selection, loading a subtitle file, subtitle delay, text size
-- Screen lock, rotation (follows the video / landscape / portrait / sensor), aspect ratio (Fit / Stretch / Crop / 16:9 / 4:3 / 100%)
+- Screen lock, rotation (follows the video / landscape / portrait / sensor), screen mode (100% → Fit to screen → Stretch → Crop, shown in big text)
 - Speed from 0.25× to 4×, repeat (one / all), automatic next video, sleep timer
 - Picture-in-picture, resume ("Resumed from 12:34 · START OVER"), pause when headphones are unplugged, audio focus
 - Controls stay clear of the notch and gesture bar, and the screen stays on while playing

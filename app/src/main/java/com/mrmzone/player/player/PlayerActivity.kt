@@ -115,8 +115,8 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var btnPrev: ImageButton
     private lateinit var btnNext: ImageButton
     private lateinit var btnDecoder: TextView
-    private lateinit var btnRepeat: ImageButton
     private lateinit var btnUnlock: ImageButton
+    private lateinit var btnRepeat: ImageButton
     private lateinit var seek: SeekBar
     private lateinit var posText: TextView
     private lateinit var durText: TextView
@@ -427,6 +427,7 @@ class PlayerActivity : AppCompatActivity() {
         mp.media = media
         media.release()
         mp.rate = 1f
+        updateSpeedLabel()
         loading.visibility = View.VISIBLE
         requestFocus()
         mp.play()
@@ -538,8 +539,8 @@ class PlayerActivity : AppCompatActivity() {
         btnPrev = findViewById(R.id.btnPrev)
         btnNext = findViewById(R.id.btnNext)
         btnDecoder = findViewById(R.id.btnDecoder)
-        btnRepeat = findViewById(R.id.btnRepeat)
         btnUnlock = findViewById(R.id.btnUnlock)
+        btnRepeat = findViewById(R.id.btnRepeat)
         seek = findViewById(R.id.seek)
         posText = findViewById(R.id.posText)
         durText = findViewById(R.id.durText)
@@ -625,7 +626,6 @@ class PlayerActivity : AppCompatActivity() {
             override fun onStopTrackingTouch(sb: SeekBar) { userSeeking = false; mp.time = sb.progress.toLong(); scheduleHide() }
         })
         btnDecoder.text = decoder.short
-        updateRepeatIcon()
     }
 
     private fun showControls(show: Boolean) {
@@ -654,8 +654,8 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun updateNavButtons() {
-        btnPrev.alpha = if (index > 0) 1f else 0.4f
-        btnNext.alpha = if (index + 1 < items.size) 1f else 0.4f
+        btnPrev.alpha = if (index > 0) 1f else 0.35f
+        btnNext.alpha = if (index + 1 < items.size) 1f else 0.35f
     }
 
     private fun updateProgress() {
@@ -740,13 +740,18 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun applyAspect() {
         mp.videoScale = when (aspect) {
+            Aspect.ORIGINAL -> MediaPlayer.ScaleType.SURFACE_ORIGINAL
             Aspect.FIT -> MediaPlayer.ScaleType.SURFACE_BEST_FIT
             Aspect.FILL -> MediaPlayer.ScaleType.SURFACE_FILL
             Aspect.CROP -> MediaPlayer.ScaleType.SURFACE_FIT_SCREEN
-            Aspect.R16_9 -> MediaPlayer.ScaleType.SURFACE_16_9
-            Aspect.R4_3 -> MediaPlayer.ScaleType.SURFACE_4_3
-            Aspect.ORIGINAL -> MediaPlayer.ScaleType.SURFACE_ORIGINAL
         }
+        findViewById<ImageButton>(R.id.btnAspect).setImageResource(
+            when (aspect) {
+                Aspect.ORIGINAL -> R.drawable.ic_aspect_100
+                Aspect.FIT -> R.drawable.ic_aspect_fit
+                Aspect.FILL -> R.drawable.ic_aspect_stretch
+                Aspect.CROP -> R.drawable.ic_aspect_crop
+            })
     }
 
     private fun cycleAspect() {
@@ -754,7 +759,7 @@ class PlayerActivity : AppCompatActivity() {
         prefs.aspect = aspect.ordinal
         setZoom(1f)
         applyAspect()
-        flash(R.drawable.ic_aspect, aspect.label)
+        showModeLabel(aspect.label.uppercase())
     }
 
     private fun setZoom(z: Float) {
@@ -765,15 +770,12 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun cycleRepeat() {
         repeat = Repeat.entries[(repeat.ordinal + 1) % Repeat.entries.size]
-        updateRepeatIcon()
+        btnRepeat.setImageResource(if (repeat == Repeat.ONE) R.drawable.ic_repeat_one else R.drawable.ic_repeat)
+        btnRepeat.alpha = if (repeat == Repeat.OFF) 0.6f else 1f
         flash(if (repeat == Repeat.ONE) R.drawable.ic_repeat_one else R.drawable.ic_repeat,
             when (repeat) { Repeat.OFF -> "Repeat off"; Repeat.ONE -> "Repeat this video"; Repeat.ALL -> "Repeat all" })
     }
 
-    private fun updateRepeatIcon() {
-        btnRepeat.setImageResource(if (repeat == Repeat.ONE) R.drawable.ic_repeat_one else R.drawable.ic_repeat)
-        btnRepeat.alpha = if (repeat == Repeat.OFF) 0.5f else 1f
-    }
 
     // ---------- PiP ----------
     private fun isInPip() = Build.VERSION.SDK_INT >= 24 && isInPictureInPictureMode
@@ -973,6 +975,23 @@ class PlayerActivity : AppCompatActivity() {
         osd.visibility = View.VISIBLE; ui.removeCallbacks(hideOsd)
     }
 
+    private val hideModeLabel = Runnable { findViewById<View>(R.id.modeLabel).visibility = View.GONE }
+
+    /** Big text in the middle of the screen, e.g. "FIT TO SCREEN". */
+    private fun showModeLabel(text: String) {
+        osd.visibility = View.GONE
+        val tv = findViewById<TextView>(R.id.modeLabel)
+        // "FIT TO SCREEN" must fit on one line even on a narrow portrait phone
+        tv.textSize = minOf(42f, (resources.configuration.screenWidthDp - 48) / (text.length * 0.66f))
+        tv.text = text
+        tv.visibility = View.VISIBLE
+        ui.removeCallbacks(hideModeLabel); ui.postDelayed(hideModeLabel, 1500)
+    }
+
+    private fun updateSpeedLabel() {
+        findViewById<TextView>(R.id.btnSpeed).text = Fmt.speed(mp.rate).uppercase()
+    }
+
     private fun flash(icon: Int, text: String) {
         osdIcon.setImageResource(icon); osdText.text = text; osdBar.visibility = View.GONE
         osd.visibility = View.VISIBLE
@@ -1044,7 +1063,7 @@ class PlayerActivity : AppCompatActivity() {
         val labels = speeds.map { Fmt.speed(it) + if (it == 1f) "  (Normal)" else "" }.toTypedArray()
         val cur = speeds.indexOfFirst { abs(it - mp.rate) < 0.01f }
         MaterialAlertDialogBuilder(this).setTitle("Playback speed")
-            .setSingleChoiceItems(labels, cur) { d, w -> mp.rate = speeds[w]; d.dismiss(); flash(R.drawable.ic_speed, "Speed ${Fmt.speed(speeds[w])}") }
+            .setSingleChoiceItems(labels, cur) { d, w -> mp.rate = speeds[w]; updateSpeedLabel(); d.dismiss(); flash(R.drawable.ic_speed, "Speed ${Fmt.speed(speeds[w])}") }
             .setNegativeButton("Close", null).show()
     }
 
@@ -1064,6 +1083,7 @@ class PlayerActivity : AppCompatActivity() {
                     val keepRate = mp.rate
                     startPlayback(t, false)
                     mp.rate = keepRate
+                    updateSpeedLabel()
                     flash(R.drawable.ic_decoder, nd.label)
                 }
             }

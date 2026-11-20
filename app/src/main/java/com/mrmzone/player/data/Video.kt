@@ -20,7 +20,8 @@ data class Video(
     val ext: String get() = name.substringAfterLast('.', "").uppercase()
 }
 
-data class Folder(val path: String, val name: String, val videos: List<Video>) {
+/** [videos] = every video inside (also in sub-folders); [subfolders] = direct child folders that contain videos. */
+data class Folder(val path: String, val name: String, val videos: List<Video>, val subfolders: Int = 0) {
     val count get() = videos.size
     val totalSize get() = videos.sumOf { it.size }
     val newest get() = videos.maxOfOrNull { it.dateAdded } ?: 0L
@@ -91,6 +92,61 @@ object Library {
         val base = videoName.substringBeforeLast('.').lowercase()
         val sub = fileName.substringBeforeLast('.').lowercase()
         return sub == base || sub.startsWith("$base.")
+    }
+
+    // ---------------- folder by folder (tree) ----------------
+
+    /** "/storage/emulated/0/DCIM/Camera" -> "/storage/emulated/0" ; "/storage/1A2B-3C4D/Movies" -> "/storage/1A2B-3C4D" */
+    fun volumeRoot(path: String): String {
+        Regex("^(/storage/emulated/\\d+|/storage/[^/]+|/sdcard|/mnt/[^/]+/[^/]+|/mnt/[^/]+)").find(path)?.let { return it.value }
+        return "/" + path.trim('/').substringBefore('/')
+    }
+
+    fun volumeName(root: String): String = when {
+        root.startsWith("/storage/emulated") || root == "/sdcard" -> "Internal storage"
+        root.startsWith("/storage/") -> "SD card"
+        else -> root.substringAfterLast('/').ifEmpty { "Storage" }
+    }
+
+    data class Level(val folders: List<Folder>, val videos: List<Video>)
+
+    /**
+     * What is directly inside [dir]: child folders that contain videos (anywhere below them) and the videos
+     * that sit right in [dir]. dir == null means the top: the storage volume's own content, or the
+     * volumes themselves when there is more than one (phone + SD card).
+     */
+    fun level(all: List<Video>, dir: String?): Level {
+        if (dir == null) {
+            val roots = all.map { volumeRoot(it.folderPath) }.distinct()
+            if (roots.size == 1) return level(all, roots[0])
+            val vols = roots.map { r ->
+                val inside = all.filter { volumeRoot(it.folderPath) == r }
+                Folder(r, volumeName(r), inside, level(inside, r).folders.size)
+            }
+            return Level(vols, emptyList())
+        }
+        val base = dir.trimEnd('/')
+        val direct = all.filter { it.folderPath.trimEnd('/') == base }
+        val below = all.filter { it.folderPath.startsWith("$base/") }
+        val groups = below.groupBy { it.folderPath.removePrefix("$base/").substringBefore('/') }
+        val folders = groups.map { (name, vids) ->
+            val childPath = "$base/$name"
+            val subs = vids.filter { it.folderPath.startsWith("$childPath/") }
+                .map { it.folderPath.removePrefix("$childPath/").substringBefore('/') }.distinct().size
+            Folder(childPath, name, vids, subs)
+        }
+        return Level(folders, direct)
+    }
+
+    /** "Videos › DCIM › Camera" for the bottom path bar. */
+    fun breadcrumb(dir: String, all: List<Video>): String {
+        val roots = all.map { volumeRoot(it.folderPath) }.distinct()
+        val root = volumeRoot(dir)
+        val rel = dir.removePrefix(root).trim('/')
+        val parts = mutableListOf("Videos")
+        if (roots.size > 1) parts += volumeName(root)
+        if (rel.isNotEmpty()) parts += rel.split('/')
+        return parts.joinToString("  ›  ")
     }
 
     fun isNew(v: Video, nowSec: Long, played: Boolean): Boolean = !played && nowSec - v.dateAdded < 3 * 24 * 3600

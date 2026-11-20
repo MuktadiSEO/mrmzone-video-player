@@ -33,14 +33,23 @@
         <item name="android:tint">#FFFFFF</item>
     </style>
 
+    <style name="PlayerRound">
+        <item name="android:layout_width">46dp</item>
+        <item name="android:layout_height">46dp</item>
+        <item name="android:layout_marginStart">14dp</item>
+        <item name="android:padding">11dp</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:background">@drawable/bg_round_btn</item>
+        <item name="android:tint">#FFFFFF</item>
+    </style>
+
     <style name="PlayerTool">
         <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_height">44dp</item>
         <item name="android:layout_weight">1</item>
-        <item name="android:gravity">center</item>
-        <item name="android:orientation">vertical</item>
-        <item name="android:paddingTop">4dp</item>
-        <item name="android:paddingBottom">4dp</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:scaleType">fitCenter</item>
         <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="android:tint">#FFFFFF</item>
     </style>
 </resources>

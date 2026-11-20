@@ -74,6 +74,16 @@ object Dialogs {
             .show()
     }
 
+    fun folderMode(a: Activity, prefs: Prefs, done: () -> Unit) {
+        val items = arrayOf(
+            "All folders – every folder that has videos, in one list",
+            "Folder by folder – open folders one level at a time",
+        )
+        MaterialAlertDialogBuilder(a).setTitle("Show folders")
+            .setSingleChoiceItems(items, prefs.folderMode) { d, w -> prefs.folderMode = w; d.dismiss(); done() }
+            .setNegativeButton("Cancel", null).show()
+    }
+
     fun confirm(a: Activity, title: String, msg: String, ok: String = "OK", yes: () -> Unit) {
         MaterialAlertDialogBuilder(a).setTitle(title).setMessage(msg)
             .setPositiveButton(ok) { _, _ -> yes() }

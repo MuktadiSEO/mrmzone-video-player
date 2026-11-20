@@ -57,3 +57,43 @@ class LibraryTest {
         assertFalse(Library.isNew(v("a", date = now - 5 * 24 * 3600), now, false))
     }
 }
+
+class FolderTreeTest {
+    private fun v(path: String) = Video(path.hashCode().toLong(), "content://x$path", path, path.substringAfterLast('/'),
+        path.substringBeforeLast('/'), path.substringBeforeLast('/').substringAfterLast('/'), 1, 10, 0, 0, 1)
+
+    private val all = listOf(
+        v("/storage/emulated/0/DCIM/Camera/a.mp4"),
+        v("/storage/emulated/0/DCIM/Camera/b.mp4"),
+        v("/storage/emulated/0/DCIM/ScreenRecorder/c.mp4"),
+        v("/storage/emulated/0/Download/d.mkv"),
+        v("/storage/emulated/0/Download/Telegram/e.mkv"),
+        v("/storage/emulated/0/IDM/f.mp4"),
+    )
+
+    @Test fun topLevelShowsFoldersOfInternalStorage() {
+        val l = Library.level(all, null)
+        assertEquals(setOf("DCIM", "Download", "IDM"), l.folders.map { it.name }.toSet())
+        assertTrue(l.videos.isEmpty())
+        val dcim = l.folders.first { it.name == "DCIM" }
+        assertEquals(3, dcim.count)       // all videos below DCIM
+        assertEquals(2, dcim.subfolders)  // Camera + ScreenRecorder
+        assertEquals(0, l.folders.first { it.name == "IDM" }.subfolders)
+    }
+
+    @Test fun insideAFolderShowsSubfoldersAndItsOwnVideos() {
+        val l = Library.level(all, "/storage/emulated/0/Download")
+        assertEquals(listOf("Telegram"), l.folders.map { it.name })
+        assertEquals(listOf("d.mkv"), l.videos.map { it.name })
+    }
+
+    @Test fun sdCardAppearsAsSecondVolume() {
+        val l = Library.level(all + v("/storage/1A2B-3C4D/Movies/m.mkv"), null)
+        assertEquals(setOf("Internal storage", "SD card"), l.folders.map { it.name }.toSet())
+    }
+
+    @Test fun breadcrumb() {
+        assertEquals("Videos  ›  DCIM  ›  Camera", Library.breadcrumb("/storage/emulated/0/DCIM/Camera", all))
+        assertEquals("Videos", Library.breadcrumb("/storage/emulated/0", all))
+    }
+}

@@ -14,6 +14,7 @@ class Prefs(ctx: Context) {
     var sortBy: SortBy get() = SortBy.entries[p.getInt("sortBy", SortBy.NAME.ordinal).coerceIn(0, SortBy.entries.size - 1)]
         set(v) = p.edit().putInt("sortBy", v.ordinal).apply()
     var sortAsc: Boolean get() = p.getBoolean("sortAsc", true); set(v) = p.edit().putBoolean("sortAsc", v).apply()
+    var folderMode: Int get() = p.getInt("folderMode", 0); set(v) = p.edit().putInt("folderMode", v).apply() // 0 all folders, 1 folder by folder
     var tab: Int get() = p.getInt("tab", 0); set(v) = p.edit().putInt("tab", v).apply()
 
     var decoder: PlayerLogic.Decoder get() = PlayerLogic.Decoder.entries[p.getInt("decoder", 0).coerceIn(0, 2)]
@@ -30,7 +31,7 @@ class Prefs(ctx: Context) {
     var subtitleScale: Int get() = p.getInt("subScale", 100); set(v) = p.edit().putInt("subScale", v).apply()
     var rememberBrightness: Boolean get() = p.getBoolean("remBri", false); set(v) = p.edit().putBoolean("remBri", v).apply()
     var brightness: Float get() = p.getFloat("bri", -1f); set(v) = p.edit().putFloat("bri", v).apply()
-    var aspect: Int get() = p.getInt("aspect", 0); set(v) = p.edit().putInt("aspect", v).apply()
+    var aspect: Int get() = p.getInt("screenMode", 1); set(v) = p.edit().putInt("screenMode", v).apply() // 1 = Fit to screen
     var showRemaining: Boolean get() = p.getBoolean("remaining", false); set(v) = p.edit().putBoolean("remaining", v).apply()
 
     // ----- playback positions + history -----

@@ -39,8 +39,9 @@ object PlayerLogic {
 
     val SPEEDS = floatArrayOf(0.25f, 0.5f, 0.75f, 1f, 1.25f, 1.5f, 1.75f, 2f, 2.5f, 3f, 4f)
 
+    /** Screen modes, cycled in this order: 100% -> Fit to screen -> Stretch -> Crop. */
     enum class Aspect(val label: String) {
-        FIT("Fit to screen"), FILL("Stretch"), CROP("Crop"), R16_9("16:9"), R4_3("4:3"), ORIGINAL("100%")
+        ORIGINAL("100%"), FIT("Fit to screen"), FILL("Stretch"), CROP("Crop")
     }
 
     fun nextAspect(a: Aspect): Aspect = Aspect.entries[(a.ordinal + 1) % Aspect.entries.size]

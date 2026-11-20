@@ -52,6 +52,8 @@ class MainActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_FOLDER = "folder"
         const val EXTRA_FOLDER_NAME = "folderName"
+        /** "Folder by folder" mode: the directory whose sub-folders + videos are shown. */
+        const val EXTRA_TREE_DIR = "treeDir"
         private val io = Executors.newSingleThreadExecutor()
     }
 
@@ -63,6 +65,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tabs: TabLayout
     private lateinit var fab: ExtendedFloatingActionButton
     private var folderPath: String? = null
+    private var treeDir: String? = null
+    /** true on the FOLDERS tab (or a tree sub-screen) when "Folder by folder" is chosen */
+    private val treeMode get() = treeDir != null || (folderPath == null && tab == 0 && prefs.folderMode == 1)
     private var tab = 0
     private var query = ""
     private var videos: List<Video> = emptyList()
@@ -91,6 +96,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         prefs = Prefs(this)
         folderPath = intent.getStringExtra(EXTRA_FOLDER)
+        treeDir = intent.getStringExtra(EXTRA_TREE_DIR)
 
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
@@ -103,15 +109,20 @@ class MainActivity : AppCompatActivity() {
         refresh.setColorSchemeColors(ContextCompat.getColor(this, R.color.brand_orange), ContextCompat.getColor(this, R.color.brand_blue))
         refresh.setOnRefreshListener { reload() }
 
-        if (folderPath != null) {
+        // small phones / big system font: smaller title so it is not cut ("MRM Zo…")
+        val narrow = resources.configuration.screenWidthDp < 380
+        findViewById<TextView>(R.id.title).textSize = if (narrow) 16f else 19f
+        findViewById<TextView>(R.id.subtitle).textSize = if (narrow) 10f else 11f
+        if (folderPath != null || treeDir != null) {
             findViewById<View>(R.id.logo).visibility = View.GONE
             toolbar.setNavigationIcon(R.drawable.ic_back_w)
             toolbar.setNavigationContentDescription("Back")
             toolbar.setNavigationOnClickListener { finish() }
-            findViewById<TextView>(R.id.title).text = intent.getStringExtra(EXTRA_FOLDER_NAME) ?: File(folderPath!!).name
-            findViewById<TextView>(R.id.subtitle).text = folderPath
+            val p = folderPath ?: treeDir!!
+            findViewById<TextView>(R.id.title).text = intent.getStringExtra(EXTRA_FOLDER_NAME) ?: File(p).name
+            findViewById<TextView>(R.id.subtitle).text = p
             tabs.visibility = View.GONE
-            tab = 1
+            tab = if (treeDir != null) 0 else 1
         } else {
             listOf("FOLDERS", "VIDEOS", "RECENT").forEach { tabs.addTab(tabs.newTab().setText(it)) }
             tab = prefs.tab.coerceIn(0, 2)
@@ -184,6 +195,16 @@ class MainActivity : AppCompatActivity() {
         var rows: List<Row>
         val source = folderPath?.let { p -> videos.filter { it.folderPath == p } } ?: videos
         when {
+            treeMode && query.isBlank() -> {
+                val lvl = Library.level(videos, treeDir)
+                currentVideos = Library.sortVideos(lvl.videos, by, asc)
+                rows = Library.sortFolders(lvl.folders, by, asc).map { Row.F(it) } + currentVideos.map { Row.V(it) }
+            }
+            treeDir != null -> { // search inside this folder and everything below it
+                val below = videos.filter { it.folderPath == treeDir || it.folderPath.startsWith("$treeDir/") }
+                currentVideos = Library.sortVideos(Library.search(below, query), by, asc)
+                rows = currentVideos.map { Row.V(it) }
+            }
             folderPath == null && tab == 0 && query.isBlank() -> {
                 val folders = Library.sortFolders(Library.group(source), by, asc)
                 rows = folders.map { Row.F(it) }
@@ -230,6 +251,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateStatus() {
+        if (treeMode && videos.isNotEmpty()) {
+            val dir = treeDir ?: Library.volumeRoot(videos.first().folderPath).takeIf { videos.map { v -> Library.volumeRoot(v.folderPath) }.distinct().size == 1 }
+            statusBar.text = if (dir == null) "Videos" else Library.breadcrumb(dir, videos)
+            return
+        }
         val src = folderPath?.let { p -> videos.filter { it.folderPath == p } } ?: videos
         val folders = src.map { it.folderPath }.distinct().size
         statusBar.text = if (folderPath != null) "Videos: ${src.size}   •   ${Fmt.size(src.sumOf { it.size })}"
@@ -269,13 +295,18 @@ class MainActivity : AppCompatActivity() {
             override fun onQueryTextChange(q: String): Boolean { if (q != query) { query = q; render() }; return true }
         })
         menu.findItem(R.id.m_view).setIcon(if (prefs.grid) R.drawable.ic_list else R.drawable.ic_grid)
-        menu.findItem(R.id.m_clear_history).isVisible = folderPath == null
+        menu.findItem(R.id.m_clear_history).isVisible = folderPath == null && treeDir == null
+        menu.findItem(R.id.m_folder_mode).isVisible = folderPath == null && treeDir == null
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.m_view -> { prefs.grid = !prefs.grid; render() }
+            R.id.m_folder_mode -> Dialogs.folderMode(this, prefs) {
+                if (tab != 0 && treeDir == null) tabs.getTabAt(0)?.select()
+                render()
+            }
             R.id.m_sort -> Dialogs.sort(this, prefs) { render() }
             R.id.m_refresh -> reload()
             R.id.m_open_url -> Dialogs.openUrl(this)
@@ -289,6 +320,10 @@ class MainActivity : AppCompatActivity() {
 
     // ---------------- actions ----------------
     private fun openFolder(f: Folder) {
+        if (treeMode) {
+            startActivity(Intent(this, MainActivity::class.java).putExtra(EXTRA_TREE_DIR, f.path).putExtra(EXTRA_FOLDER_NAME, f.name))
+            return
+        }
         startActivity(Intent(this, MainActivity::class.java).putExtra(EXTRA_FOLDER, f.path).putExtra(EXTRA_FOLDER_NAME, f.name))
     }
 
