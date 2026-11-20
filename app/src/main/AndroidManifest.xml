@@ -45,6 +45,7 @@
             android:excludeFromRecents="false"
             android:resizeableActivity="true"
             android:supportsPictureInPicture="true"
+            android:screenOrientation="sensorLandscape"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboard|keyboardHidden|navigation|uiMode">
             <!-- Open videos & audio from file managers, gallery, browsers, WhatsApp, Telegram ... -->
             <intent-filter>

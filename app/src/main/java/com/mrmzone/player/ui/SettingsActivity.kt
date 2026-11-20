@@ -28,7 +28,6 @@ class SettingsActivity : AppCompatActivity() {
         f.note("Resume playback")
         f.radios(listOf("Always resume", "Ask every time", "Always start from beginning"), p.resumeMode) { p.resumeMode = it }
         f.switch("Play next video in folder automatically", p.autoNext) { p.autoNext = it }
-        f.switch("Auto rotate screen to match the video", p.autoRotate) { p.autoRotate = it }
         f.switch("Show remaining time instead of total", p.showRemaining) { p.showRemaining = it }
         f.slider("Double-tap seek", 5, 30, 5, p.doubleTapSeek, { "$it seconds" }) { p.doubleTapSeek = it }
 

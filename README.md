@@ -29,7 +29,7 @@ The engine is the open-source **VLC (libVLC 3.6)**. AC3/DTS/TrueHD audio is alwa
 - HW / HW+ / SW decoder switch while a video plays. If HW fails, it falls back to SW automatically
 - Audio track selection (shows codec and channels, e.g. "AC3 5.1"), audio delay
 - Subtitle track selection, loading a subtitle file, subtitle delay, text size
-- Screen lock, rotation (follows the video / landscape / portrait / sensor), screen mode (100% → Fit to screen → Stretch → Crop, shown in big text)
+- Every video opens in landscape; rotate button: landscape / portrait / auto rotate. Screen lock, screen mode (100% → Fit to screen → Stretch → Crop, shown in big text)
 - Speed from 0.25× to 4×, repeat (one / all), automatic next video, sleep timer
 - Picture-in-picture, resume ("Resumed from 12:34 · START OVER"), pause when headphones are unplugged, audio focus
 - Controls stay clear of the notch and gesture bar, and the screen stays on while playing

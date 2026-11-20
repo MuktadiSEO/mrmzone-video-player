@@ -94,7 +94,7 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private enum class Gesture { NONE, SEEK, VOLUME, BRIGHTNESS }
-    private enum class Orient(val label: String) { VIDEO("Auto (match video)"), LANDSCAPE("Landscape"), PORTRAIT("Portrait"), SENSOR("Auto rotate") }
+    private enum class Orient(val label: String) { LANDSCAPE("Landscape"), PORTRAIT("Portrait"), SENSOR("Auto rotate") }
 
     private lateinit var prefs: Prefs
     private val debugLog by lazy { (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0 }
@@ -137,7 +137,7 @@ class PlayerActivity : AppCompatActivity() {
     private var triedSwFallback = false
     private var subAutoDone = false
     private var aspect = Aspect.FIT
-    private var orient = Orient.VIDEO
+    private var orient = Orient.LANDSCAPE // every video opens in landscape
     private var repeat = Repeat.OFF
     private var locked = false
     private var userSeeking = false
@@ -579,15 +579,19 @@ class PlayerActivity : AppCompatActivity() {
         hideSystemBars()
     }
 
-    private fun hideSystemBars() {
+    private fun hideSystemBars() = syncSystemBars()
+
+    /** The phone's own back / home / recents buttons (and status bar) show together with our controls. */
+    private fun syncSystemBars() {
         val c = WindowInsetsControllerCompat(window, window.decorView)
         c.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        c.hide(WindowInsetsCompat.Type.systemBars())
+        val show = ::controls.isInitialized && controls.visibility == View.VISIBLE && !locked && !isInPip()
+        if (show) c.show(WindowInsetsCompat.Type.systemBars()) else c.hide(WindowInsetsCompat.Type.systemBars())
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
-        if (hasFocus) hideSystemBars()
+        if (hasFocus) syncSystemBars()
     }
 
     private fun setupControls() {
@@ -631,6 +635,7 @@ class PlayerActivity : AppCompatActivity() {
     private fun showControls(show: Boolean) {
         if (locked && show) { showUnlockButton(); return }
         controls.visibility = if (show) View.VISIBLE else View.GONE
+        syncSystemBars()
         if (show) { updateProgress(); scheduleHide() } else ui.removeCallbacks(hideControls)
     }
 
@@ -715,11 +720,6 @@ class PlayerActivity : AppCompatActivity() {
     private fun applyOrientation() {
         if (locked) return
         requestedOrientation = when (orient) {
-            Orient.VIDEO -> when {
-                !prefs.autoRotate || videoW == 0 -> ActivityInfo.SCREEN_ORIENTATION_FULL_USER
-                videoW >= videoH -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-                else -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
-            }
             Orient.LANDSCAPE -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
             Orient.PORTRAIT -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
             Orient.SENSOR -> ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
@@ -727,12 +727,10 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun cycleOrientation() {
-        val landscapeNow = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         orient = when (orient) {
-            Orient.VIDEO -> if (landscapeNow) Orient.PORTRAIT else Orient.LANDSCAPE
             Orient.LANDSCAPE -> Orient.PORTRAIT
             Orient.PORTRAIT -> Orient.SENSOR
-            Orient.SENSOR -> Orient.VIDEO
+            Orient.SENSOR -> Orient.LANDSCAPE
         }
         applyOrientation()
         flash(R.drawable.ic_rotate, orient.label)
