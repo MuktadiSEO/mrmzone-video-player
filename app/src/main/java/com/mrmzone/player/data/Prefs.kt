@@ -29,8 +29,9 @@ class Prefs(ctx: Context) {
     var volumeBoost: Boolean get() = p.getBoolean("boost", true); set(v) = p.edit().putBoolean("boost", v).apply()
     var autoRotate: Boolean get() = p.getBoolean("autoRotate", true); set(v) = p.edit().putBoolean("autoRotate", v).apply()
     var subtitleScale: Int get() = p.getInt("subScale", 100); set(v) = p.edit().putInt("subScale", v).apply()
-    var rememberBrightness: Boolean get() = p.getBoolean("remBri", false); set(v) = p.edit().putBoolean("remBri", v).apply()
-    var brightness: Float get() = p.getFloat("bri", -1f); set(v) = p.edit().putFloat("bri", v).apply()
+    var rememberBrightness: Boolean get() = p.getBoolean("remBri", true); set(v) = p.edit().putBoolean("remBri", v).apply()
+    /** Player brightness 0..100 %, -1 = follow the phone. */
+    var brightnessPct: Int get() = p.getInt("briPct", -1); set(v) = p.edit().putInt("briPct", v).apply()
     var aspect: Int get() = p.getInt("screenMode", 1); set(v) = p.edit().putInt("screenMode", v).apply() // 1 = Fit to screen
     var showRemaining: Boolean get() = p.getBoolean("remaining", false); set(v) = p.edit().putBoolean("remaining", v).apply()
 

@@ -162,7 +162,9 @@ class PlayerActivity : AppCompatActivity() {
     private var seekTarget = 0L
     private var lastLiveSeek = 0L
     private var startVolume = 0f
-    private var startBrightness = 0.5f
+    private var startBrightness = 50
+    /** Player brightness 0..100, or -1 while the phone's own brightness is in use. */
+    private var brightnessPct = -1
     private var scaling = false
     private var tapAccum = 0
     private var lastTapSide = 0
@@ -212,7 +214,7 @@ class PlayerActivity : AppCompatActivity() {
         aspect = Aspect.entries.getOrElse(prefs.aspect) { Aspect.FIT }
         bindViews()
         setupImmersive()
-        if (prefs.rememberBrightness && prefs.brightness > 0) setBrightness(prefs.brightness)
+        if (prefs.rememberBrightness && prefs.brightnessPct >= 0) setBrightness(prefs.brightnessPct)
 
         libVLC = LibVLC(this, vlcOptions())
         mp = MediaPlayer(libVLC)
@@ -242,7 +244,11 @@ class PlayerActivity : AppCompatActivity() {
         if (!mp.vlcVout.areViewsAttached()) mp.attachViews(videoLayout, null, true, false)
         applyAspect()
         if (started) {
-            if (wasPlaying) mp.play() else if (mp.isSeekable) mp.time = mp.time // redraw a frame while paused
+            // The video surface was destroyed while away, so the decoder would otherwise wait for
+            // the next keyframe (often 2-3 s) and show black while the sound already plays.
+            // A precise seek to the same spot decodes from the previous keyframe straight away.
+            if (mp.isSeekable) mp.setTime(maxOf(0L, mp.time), false)
+            if (wasPlaying) mp.play()
         }
         ui.post(ticker)
     }
@@ -261,7 +267,7 @@ class PlayerActivity : AppCompatActivity() {
             mp.detachViews()
         } else if (isFinishing) mp.stop()
         ui.removeCallbacks(ticker)
-        if (prefs.rememberBrightness) window.attributes.screenBrightness.takeIf { it > 0 }?.let { prefs.brightness = it }
+        if (prefs.rememberBrightness && brightnessPct >= 0) prefs.brightnessPct = brightnessPct
     }
 
     override fun onDestroy() {
@@ -954,22 +960,29 @@ class PlayerActivity : AppCompatActivity() {
         osd.visibility = View.VISIBLE; ui.removeCallbacks(hideOsd)
     }
 
-    private fun currentBrightness(): Float {
-        val b = window.attributes.screenBrightness
-        if (b >= 0) return b
-        return runCatching { Settings.System.getInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS) / 255f }.getOrDefault(0.5f)
+    /** Current player brightness in %, starting from the phone's own level until the user changes it. */
+    private fun currentBrightness(): Int {
+        if (brightnessPct >= 0) return brightnessPct
+        val max = runCatching {
+            val id = android.content.res.Resources.getSystem().getIdentifier("config_screenBrightnessSettingMaximum", "integer", "android")
+            if (id != 0) android.content.res.Resources.getSystem().getInteger(id) else 255
+        }.getOrDefault(255).coerceAtLeast(1)
+        val sys = runCatching { Settings.System.getInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS) }.getOrDefault(max / 2)
+        return PlayerLogic.windowToBrightness(sys.toFloat() / max)
     }
 
-    private fun setBrightness(v: Float) {
-        window.attributes = window.attributes.apply { screenBrightness = v.coerceIn(0.01f, 1f) }
+    /** Overrides the screen brightness for this window only; the phone's setting is untouched. */
+    private fun setBrightness(percent: Int) {
+        brightnessPct = percent.coerceIn(0, 100)
+        window.attributes = window.attributes.apply { screenBrightness = PlayerLogic.brightnessToWindow(brightnessPct) }
     }
 
     private fun gestureBrightness(frac: Float) {
-        val b = (startBrightness + frac).coerceIn(0.01f, 1f)
+        val b = (startBrightness + Math.round(frac * 100)).coerceIn(0, 100)
         setBrightness(b)
         osdIcon.setImageResource(R.drawable.ic_brightness)
-        osdText.text = "Brightness ${(b * 100).toInt()}%"
-        osdBar.visibility = View.VISIBLE; osdBar.progress = (b * 100).toInt()
+        osdText.text = "Brightness $b%"
+        osdBar.visibility = View.VISIBLE; osdBar.progress = b
         osd.visibility = View.VISIBLE; ui.removeCallbacks(hideOsd)
     }
 

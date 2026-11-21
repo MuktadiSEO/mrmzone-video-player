@@ -46,4 +46,12 @@ class PlayerLogicTest {
         repeat(PlayerLogic.Aspect.entries.size) { a = PlayerLogic.nextAspect(a) }
         assertEquals(PlayerLogic.Aspect.FIT, a)
     }
+
+    @Test fun brightnessFullIsPanelMax() {
+        assertEquals(1f, PlayerLogic.brightnessToWindow(100), 0.0001f)
+        assertEquals(1f, PlayerLogic.brightnessToWindow(150), 0.0001f)
+        assertTrue(PlayerLogic.brightnessToWindow(0) > 0f) // never switches the backlight off
+        assertTrue(PlayerLogic.brightnessToWindow(50) < PlayerLogic.brightnessToWindow(51))
+        for (p in 10..100 step 5) assertEquals(p, PlayerLogic.windowToBrightness(PlayerLogic.brightnessToWindow(p)))
+    }
 }

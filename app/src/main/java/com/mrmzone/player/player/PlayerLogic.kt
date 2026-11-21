@@ -47,4 +47,21 @@ object PlayerLogic {
     fun nextAspect(a: Aspect): Aspect = Aspect.entries[(a.ordinal + 1) % Aspect.entries.size]
 
     enum class Decoder(val label: String, val short: String) { HW("HW decoder", "HW"), HW_PLUS("HW+ decoder", "HW+"), SW("SW decoder", "SW") }
+
+    /**
+     * Player brightness is a 0..100 % level of its own, independent of the phone's
+     * brightness: 100 % is always the panel's full brightness, even when the phone is
+     * set low. The window value is linear in light, so a gamma curve keeps the steps
+     * even to the eye (like the system slider).
+     */
+    fun brightnessToWindow(percent: Int): Float {
+        val p = percent.coerceIn(0, 100) / 100f
+        return maxOf(0.004f, Math.pow(p.toDouble(), 2.2).toFloat())
+    }
+
+    fun windowToBrightness(window: Float): Int {
+        if (window <= 0f) return 0
+        val v = Math.pow(window.coerceAtMost(1f).toDouble(), 1 / 2.2) * 100
+        return Math.round(v).toInt().coerceIn(0, 100)
+    }
 }
