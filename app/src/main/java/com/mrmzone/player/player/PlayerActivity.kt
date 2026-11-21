@@ -234,6 +234,7 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        if (intent.data == null && !intent.getBooleanExtra(EXTRA_USE_HOLDER, false)) return // just brought back to front: keep playing
         setIntent(intent)
         savePosition()
         loadIntent(intent)

@@ -25,7 +25,7 @@ The engine is the open-source **VLC (libVLC 3.6)**. AC3/DTS/TrueHD audio is alwa
 - Properties, Share, Delete (with Android's own confirmation)
 
 **Player**
-- Gestures: swipe the right side for volume (boost up to 200%), the left side for brightness, left/right to seek, double-tap for ±10 s (adds up with repeated taps), pinch to zoom, long-press for 2× speed
+- Gestures: swipe the right side for volume (boost up to 200%), the left side for brightness (0–100%, the player's own level: 100% is full screen brightness even when the phone is set low; the phone's setting is untouched), left/right to seek, double-tap for ±10 s (adds up with repeated taps), pinch to zoom, long-press for 2× speed
 - HW / HW+ / SW decoder switch while a video plays. If HW fails, it falls back to SW automatically
 - Audio track selection (shows codec and channels, e.g. "AC3 5.1"), audio delay
 - Subtitle track selection, loading a subtitle file, subtitle delay, text size
@@ -53,6 +53,6 @@ libVLC is LGPL-2.1. The app links to it dynamically, as an unmodified `.so` from
 
 ## Testing
 
-- 22 unit tests: `./gradlew testDebugUnitTest`
+- 23 unit tests: `./gradlew testDebugUnitTest`
 - Tested on an Android 11 emulator with 16 formats, each played to the end: MKV H.264 + AC3 5.1/E-AC3 + SRT, MP4 HEVC + E-AC3, AVI Xvid + MP3 (+ external SRT), WMV + WMA, FLV + MP3, WEBM VP9 + Opus, TS MPEG-2 + AC3, MKV + DTS, MKV AV1 + FLAC, 3GP H.263 + AAC, MOV + PCM, RM RV20 + AC3, MKV + TrueHD, MPG MPEG-2 + MP2, portrait MP4, and a Bangla file name
 - Bangla subtitle rendering, audio track dialog (AC3 5.1), decoder switch, volume gesture, settings, dark mode, a small screen (320dp) with large text (130%)
